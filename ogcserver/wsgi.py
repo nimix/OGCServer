@@ -1,14 +1,20 @@
 """WSGI application wrapper for Mapnik OGC WMS Server."""
 
 try:
-    from urlparse import parse_qs
+    from urllib.parse import parse_qs
 except ImportError:
-    from cgi import parse_qs
+    try:
+        from urlparse import parse_qs
+    except ImportError:
+        from cgi import parse_qs
 
 import logging
 import imp
 
-from cStringIO import StringIO
+try:
+    from io import StringIO
+except ImportError:
+    from cStringIO import StringIO
 
 import mapnik
 
@@ -30,8 +36,8 @@ def do_import(module):
     Makes setuptools namespaces work
     """
     moduleobj = None
-    exec 'import %s' % module 
-    exec 'moduleobj=%s' % module
+    exec('import %s' % module)
+    exec('moduleobj=%s' % module)
     return moduleobj
  
 class WSGIApp:
@@ -240,7 +246,7 @@ def ogcserver_base_factory(base, global_config, **local_config):
         try:
             resp = req.get_response(app)
             return resp(environ, start_response)
-        except Exception, e:
+        except Exception as e:
             if not debug:
                 log.error('%r: %s', e, e)
                 log.error('%r', environ)

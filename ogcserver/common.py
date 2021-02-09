@@ -4,7 +4,10 @@ import re
 import sys
 import copy
 from sys import exc_info
-from StringIO import StringIO
+try:
+    from io import StringIO
+except ImportErro:
+    from StringIO import StringIO
 from xml.etree import ElementTree
 from traceback import format_exception, format_exception_only
 
@@ -193,7 +196,7 @@ class Version:
         if len(version) != 3:
             raise OGCException('Badly formatted version number.')
         try:
-            version = map(int, version)
+            version = list(map(int, version))
         except:
             raise OGCException('Badly formatted version number.')
         self.version = version
@@ -201,7 +204,7 @@ class Version:
     def __repr__(self):
         return '%s.%s.%s' % (self.version[0], self.version[1], self.version[2])
 
-    def __cmp__(self, other):
+    def cmp(self, other):
         if isinstance(other, str):
             other = Version(other)
         if self.version[0] < other.version[0]:
@@ -220,6 +223,18 @@ class Version:
                     return 1
                 else:
                     return 0
+    def __eq__(self, other):
+        return self.cmp(other) == 0
+    def __ne__(self, other):
+        return self.cmp(other) != 0
+    def __gt__(self, other):
+        return self.cmp(other) > 0
+    def __lt__(self, other):
+        return self.cmp(other) < 0
+    def __ge__(self, other):
+        return self.cmp(other) >= 0
+    def __le__(self, other):
+        return self.cmp(other) <= 0
 
 class ListFactory:
 

@@ -2,7 +2,11 @@
 
 import re
 import sys
-import ConfigParser
+try:
+    import configparser as ConfigParser
+except ImportError:
+    import ConfigParser
+
 from mapnik import Style, Map, load_map, load_map_from_string, Box2d as Envelope, Coord
 
 from ogcserver import common
@@ -117,7 +121,7 @@ Please set one of this variables to load mapnik map object.")
                     meta_lyr.wms_srs = layer_wms_srs
                     self.ordered_layers.append(meta_lyr)
                     self.meta_layers[meta_layer_name] = meta_lyr
-                    print meta_layer_name
+                    print(meta_layer_name)
 
                 if style_name not in self.aggregatestyles.keys() and style_name not in self.styles.keys():
                     self.register_style(style_name, style_obj)
@@ -143,7 +147,7 @@ Please set one of this variables to load mapnik map object.")
                         self.meta_styles[meta_layer_name] = meta_s
                         meta_lyr = common.copy_layer(lyr)
                         meta_lyr.meta_style = meta_layer_name
-                        print meta_layer_name
+                        print(meta_layer_name)
                         meta_lyr.name = meta_layer_name
                         meta_lyr.wmsextrastyles = ()
                         meta_lyr.defaultstyle = meta_layer_name
@@ -170,13 +174,13 @@ This style will effectively be hidden by the 'all styles' default style for mult
             raise ServerConfigurationError('Attempted to register an unnamed layer.')
         if not layer.wms_srs and not re.match('^\+init=epsg:\d+$', layer.srs) and not re.match('^\+proj=.*$', layer.srs):
             raise ServerConfigurationError('Attempted to register a layer without an epsg projection defined.')
-        if defaultstyle not in self.styles.keys() + self.aggregatestyles.keys():
+        if defaultstyle not in list(self.styles.keys()) + list(self.aggregatestyles.keys()):
             raise ServerConfigurationError('Attempted to register a layer with an non-existent default style.')
         layer.wmsdefaultstyle = defaultstyle
         if isinstance(extrastyles, tuple):
             for stylename in extrastyles:
                 if type(stylename) == type(''):
-                    if stylename not in self.styles.keys() + self.aggregatestyles.keys():
+                    if stylename not in list(self.styles.keys()) + list(self.aggregatestyles.keys()):
                         raise ServerConfigurationError('Attempted to register a layer with an non-existent extra style.')
                 else:
                     ServerConfigurationError('Attempted to register a layer with an invalid extra style name.')
@@ -221,5 +225,5 @@ This style will effectively be hidden by the 'all styles' default style for mult
             raise ServerConfigurationError('No styles defined!')
         for layer in self.layers.values():
             for style in list(layer.styles) + list(layer.wmsextrastyles):
-                if style not in self.styles.keys() + self.aggregatestyles.keys():
+                if style not in list(self.styles.keys()) + list(self.aggregatestyles.keys()):
                     raise ServerConfigurationError('Layer "%s" refers to undefined style "%s".' % (layer.name, style))
