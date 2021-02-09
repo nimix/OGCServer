@@ -3,7 +3,7 @@
 import re
 import sys
 import ConfigParser
-from mapnik import Style, Map, load_map, load_map_from_string, Envelope, Coord
+from mapnik import Style, Map, load_map, load_map_from_string, Box2d as Envelope, Coord
 
 from ogcserver import common
 from ogcserver.wms111 import ServiceHandler as ServiceHandler111

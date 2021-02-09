@@ -8,7 +8,7 @@ from StringIO import StringIO
 from xml.etree import ElementTree
 from traceback import format_exception, format_exception_only
 
-from mapnik import Map, Color, Envelope, render, Image, Layer, Style, Projection as MapnikProjection, Coord, mapnik_version
+from mapnik import Map, Color, Box2d as Envelope, render, Image, Layer, Style, Projection as MapnikProjection, Coord, mapnik_version
 
 try:
     from PIL.Image import new
@@ -295,8 +295,8 @@ def copy_layer(obj):
     if hasattr(obj, 'toleranceunits'):
         lyr.toleranceunits = obj.toleranceunits
     lyr.srs = obj.srs
-    lyr.minzoom = obj.minzoom
-    lyr.maxzoom = obj.maxzoom
+    lyr.minimum_scale_denominator = obj.minimum_scale_denominator
+    lyr.maximum_scale_denominator = obj.maximum_scale_denominator
     lyr.active = obj.active
     lyr.queryable = obj.queryable    
     lyr.clear_label_cache = obj.clear_label_cache
