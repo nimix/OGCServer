@@ -243,7 +243,7 @@ class ListFactory:
 
     def __call__(self, string):
         seq = string.split(',')
-        return map(self.cast, seq)
+        return list(map(self.cast, seq))
 
 def ColorFactory(colorstring):
     if re.match('^0x[a-fA-F0-9]{6}$', colorstring):
@@ -425,7 +425,7 @@ class WMSBaseServiceHandler(BaseServiceHandler):
                 m.background = Color(255, 255, 255, 255)
 
 
-        if params.has_key('buffer_size'):
+        if 'buffer_size' in params:
             if params['buffer_size']:
                 m.buffer_size = params['buffer_size']
         else:

@@ -10,6 +10,8 @@ except ImportError:
 
 import logging
 import imp
+import sys
+import traceback
 
 try:
     from io import StringIO
@@ -35,11 +37,11 @@ def do_import(module):
     """
     Makes setuptools namespaces work
     """
-    moduleobj = None
-    exec('import %s' % module)
-    exec('moduleobj=%s' % module)
-    return moduleobj
- 
+    ns = {}
+    exec('import %s' % module, ns)
+    exec('moduleobj=%s' % module, ns)
+    return ns['moduleobj'] or None
+
 class WSGIApp:
 
     def __init__(self, configpath, mapfile=None,fonts=None,home_html=None):
@@ -90,11 +92,11 @@ class WSGIApp:
             onlineresource = 'http://%s%s%s?' % (environ['HTTP_HOST'], environ['SCRIPT_NAME'], environ['PATH_INFO'])
 
         try:
-            if not reqparams.has_key('request'):
+            if not 'request' in reqparams:
                 raise OGCException('Missing request parameter.')
             request = reqparams['request']
             del reqparams['request']
-            if request == 'GetCapabilities' and not reqparams.has_key('service'):
+            if request == 'GetCapabilities' and not 'service' in reqparams:
                 raise OGCException('Missing service parameter.')
             if request in ['GetMap', 'GetFeatureInfo']:
                 service = 'WMS'
@@ -104,7 +106,7 @@ class WSGIApp:
                 except:
                     service = 'WMS'
                     request = 'GetCapabilities'
-            if reqparams.has_key('service'):
+            if 'service' in reqparams:
                 del reqparams['service']
             try:
                 ogcserver = do_import('ogcserver')
@@ -112,7 +114,7 @@ class WSGIApp:
                 raise OGCException('Unsupported service "%s".' % service)
             ServiceHandlerFactory = getattr(ogcserver, service).ServiceHandlerFactory
             servicehandler = ServiceHandlerFactory(self.conf, self.mapfactory, onlineresource, reqparams.get('version', None))
-            if reqparams.has_key('version'):
+            if 'version' in reqparams:
                 del reqparams['version']
             if request not in servicehandler.SERVICE_PARAMS.keys():
                 raise OGCException('Operation "%s" not supported.' % request, 'OperationNotSupported')
@@ -128,6 +130,8 @@ class WSGIApp:
 
             response = requesthandler(ogcparams)
         except:
+            #print("Unexpected error:", sys.exc_info())
+            traceback.print_exc()
             version = reqparams.get('version', None)
             if not version:
                 version = Version()

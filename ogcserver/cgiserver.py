@@ -54,17 +54,17 @@ class Handler(cgi.DebugHandler):
             onlineresource = 'http://%s%s?' % (req.environ['HTTP_HOST'], req.environ['SCRIPT_NAME'])
 
         try:
-            if not reqparams.has_key('request'):
+            if not 'request' in reqparams:
                 raise OGCException('Missing request parameter.')
             request = reqparams['request']
             del reqparams['request']
-            if request == 'GetCapabilities' and not reqparams.has_key('service'):
+            if request == 'GetCapabilities' and not 'service' in reqparams:
                 raise OGCException('Missing service parameter.')
             if request in ['GetMap', 'GetFeatureInfo']:
                 service = 'WMS'
             else:
                 service = reqparams['service']
-            if reqparams.has_key('service'):
+            if 'service' in reqparams:
                 del reqparams['service']
             try:
                 ogcserver = __import__('ogcserver.' + service)
@@ -72,7 +72,7 @@ class Handler(cgi.DebugHandler):
                 raise OGCException('Unsupported service "%s".' % service)
             ServiceHandlerFactory = getattr(ogcserver, service).ServiceHandlerFactory
             servicehandler = ServiceHandlerFactory(self.conf, self.mapfactory, onlineresource, reqparams.get('version', None))
-            if reqparams.has_key('version'):
+            if 'version' in reqparams:
                 del reqparams['version']
             if request not in servicehandler.SERVICE_PARAMS.keys():
                 raise OGCException('Operation "%s" not supported.' % request, 'OperationNotSupported')
